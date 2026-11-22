@@ -186,7 +186,7 @@ dialog h2 { margin-top: 0; }
     <div class="who">
       <span id="role-label"></span>
       <button id="btn-refresh" class="link" title="重新讀取資料">重新整理</button>
-      <button id="btn-logout" class="link">登出</button>
+      
     </div>
   </header>
 
@@ -365,7 +365,7 @@ dialog h2 { margin-top: 0; }
 
 <script>
 // ↓↓↓ 把 Apps Script「網頁應用程式」的網址（結尾是 /exec）貼在兩個引號中間 ↓↓↓
-const API_URL = 'https://script.google.com/macros/s/AKfycbzT9IcQsVU8aJBCcHywnKz1-19ZznyaNIQ21N50jI-hHqiwv_3U6Le2QpBchyUDMDpU/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwzTR8OJ4H4WVp_trPi_K81sJLLXJ11ESQQkl1NKbmyI4gCCdBAo-XFvgSMTvotbq0n/exec';
 // ↑↑↑ 只要改這一行，其他都不用動 ↑↑↑
 
 
@@ -459,14 +459,12 @@ async function submitWith(btn, fn) {
 /* ---------------- 登入 ---------------- */
 
 async function start() {
-  S.token = store('inv_token');
-  if (!S.token) return showLogin();
+  // 無通行碼版本：直接載入
   try {
     await loadData();
     showApp();
   } catch (e) {
-    if (e.server && /通行碼/.test(e.message)) { store('inv_token', null); showLogin(); }
-    else { showLogin(); }
+    $('#app').hidden = false;
     showMsg(e.message, 'err');
   }
 }
@@ -489,12 +487,6 @@ $('#login-form').addEventListener('submit', e => {
   });
 });
 
-$('#btn-logout').addEventListener('click', () => {
-  store('inv_token', null);
-  S.token = null; S.d = null;
-  document.body.classList.remove('is-admin');
-  showLogin();
-});
 
 $('#btn-refresh').addEventListener('click', () => {
   submitWith(null, async () => { await loadData(); showMsg('資料已更新', 'ok'); });
@@ -513,7 +505,7 @@ async function loadData() {
   S.d = d;
   S.role = d.role;
   document.body.classList.toggle('is-admin', d.role === 'admin');
-  $('#role-label').textContent = d.role === 'admin' ? '院長' : '臨床組';
+  $('#role-label').textContent = '';
   S.itemById = {}; S.itemByLabel = {};
   d.items.forEach(it => { S.itemById[it.id] = it; S.itemByLabel[itemLabel(it)] = it; });
   const active = d.items.filter(i => i.active);
